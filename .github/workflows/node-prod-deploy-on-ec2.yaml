@@ -4,13 +4,13 @@ on:
   push:
     branches:
       - main
+
 env:
-  EC2_USERNAME: ec2-user #The username to log in to the EC2 instance.
+  EC2_USERNAME: ec2-user
   AWS_REGION: us-west-2
-  AWS_ACCOUNT_ID: 161680477677 #AWS account ID.
+  AWS_ACCOUNT_ID: 161680477677
   ECR_REPOSITORY_NAME: saif-ali
 
-                                               
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -35,13 +35,13 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        ECR_IMAGE_NAME: $ECR_REGISTRY/$ECR_REPOSITORY_NAME
         IMAGE_TAG: ${{ github.sha }}
       run: |
-
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        docker build -t $ECR_IMAGE_NAME:$IMAGE_TAG .
+        docker push $ECR_IMAGE_NAME:$IMAGE_TAG
+        echo "image=$ECR_IMAGE_NAME:$IMAGE_TAG" >> $GITHUB_ENV
 
     - name: Deploy to EC2
       run: |
-        ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'docker pull ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY_NAME }}:${{ github.sha }} && docker run -d -p 3000:3000 ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:${{ github.sha }}'
+        ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'docker pull $ECR_IMAGE_NAME:$IMAGE_TAG && docker run -d -p 3000:3000 $ECR_IMAGE_NAME:$IMAGE_TAG'
