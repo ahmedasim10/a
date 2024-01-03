@@ -48,12 +48,7 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-    - name: Debug
-      run: |
-          echo "ECR_IMAGE_NAME: $ECR_IMAGE_NAME"
-          echo "IMAGE_TAG: $IMAGE_TAG"
-   
+
     - name: Deploy to EC2
       run: |
-         ssh -o StrictHostKeyChecking=no ${{ env.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "$(printf 'docker pull %s:%s && docker run -d -p 3000:3000 %s:%s' "$ECR_IMAGE_NAME" "$IMAGE_TAG" "$ECR_IMAGE_NAME" "$IMAGE_TAG")"
-    
+        ssh -o StrictHostKeyChecking=no ${{ env.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'docker pull 161680477677.dkr.ecr.us-west-2.amazonaws.com/saif-ali:'"${IMAGE_TAG}"' && docker run -d -p 3000:3000 $ECR_IMAGE_NAME:$IMAGE_TAG'
