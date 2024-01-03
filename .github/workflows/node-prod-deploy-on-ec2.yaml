@@ -51,4 +51,5 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -o StrictHostKeyChecking=no -i ${{ secrets.EC2_SSH_PRIVATE_KEY }} ${{ env.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'docker pull $ECR_IMAGE_NAME:$IMAGE_TAG && docker run -d -p 3000:3000 $ECR_IMAGE_NAME:$IMAGE_TAG'
+        echo ${{ secrets.EC2_SSH_PRIVATE_KEY }} > key.pem && chmod 0400 key.pem
+        ssh -o StrictHostKeyChecking=no -i key.pem ${{ env.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'docker pull $ECR_IMAGE_NAME:$IMAGE_TAG && docker run -d -p 3000:3000 $ECR_IMAGE_NAME:$IMAGE_TAG'
