@@ -49,12 +49,15 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@master
-      with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ env.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+        - name: Deploy to EC2 instances
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.EC2_HOST}}
+          username: ${{env.EC2_USERNAME}}
+          key: ${{secrets.EC2_SSH_PRIVATE_KEY}}
           script: |
-            ssh -o StrictHostKeyChecking=no ${{ env.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG && docker run -d -p 3000:3000 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            docker pull ${{env.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPOSITORY}}:${{ github.sha }}
+            docker stop your-container-name || true
+            docker rm your-container-name || true
+            docker run -d -p 80:80 --name node ${{env.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPOSITORY}}:${{ github.sha }}
       
