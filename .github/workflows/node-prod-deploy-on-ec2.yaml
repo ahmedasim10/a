@@ -10,6 +10,7 @@ env:
   AWS_REGION: us-west-2
   AWS_ACCOUNT_ID: 161680477677
   ECR_REPOSITORY_NAME: saif-ali
+  ECR_REGISTRY: 161680477677.dkr.ecr.us-west-2.amazonaws.com
 
 jobs:
   deploy:
