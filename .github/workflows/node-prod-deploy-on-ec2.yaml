@@ -51,4 +51,5 @@ jobs:
 
     - name: Deploy to EC2
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ env.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'docker pull 161680477677.dkr.ecr.us-west-2.amazonaws.com/saif-ali:'"${IMAGE_TAG}"' && docker run -d -p 3000:3000 $ECR_IMAGE_NAME:$IMAGE_TAG'
+        ssh -o StrictHostKeyChecking=no ${{ env.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG && docker run -d -p 3000:3000 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+    
