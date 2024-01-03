@@ -50,5 +50,11 @@ jobs:
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
     - name: Deploy to EC2
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ env.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'docker pull ${{ needs.build-and-push.outputs.image_uri }}' "$ECR_IMAGE_NAME"':'"$IMAGE_TAG" '' && docker run -d -p 3000:3000 $ECR_IMAGE_NAME:$IMAGE_TAG'
+      uses: appleboy/ssh-action@master
+      with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ env.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          script: |
+            ssh -o StrictHostKeyChecking=no ${{ env.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG && docker run -d -p 3000:3000 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+      
