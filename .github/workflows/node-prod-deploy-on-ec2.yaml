@@ -49,11 +49,14 @@ jobs:
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
     - name: Deploy to EC2 instances
-      run: |
-        ssh -o StrictHostKeyChecking=no -i ${{ secrets.AWS_ACCESS_KEY_ID }}:${{ secrets.AWS_SECRET_ACCESS_KEY }}:${{env.AWS_ACCOUNT_ID}}:${{ secrets.AWS_REGION }}:${{ secrets.EC2_HOST }}:${{ secrets.EC2_SSH_PRIVATE_KEY }}:
-          ${{ env.EC2_USERNAME }}:${{ env.ECR_REPOSITORY }}:${{ env.ECR_REGISTRY }}
+      uses: appleboy/ssh-action@master
+      with:
+           host: ${{ secrets.EC2_HOST }}
+           username: ${{ env.EC2_USERNAME }}
+           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+           script: |
+            sudo systemctl start docker
+            sudo docker pull ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+            sudo docker run -d -p 80:80 --name node ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
       
-          sudo systemctl start docker
-          sudo docker pull ${{env.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPOSITORY}}:${{ github.sha }}
-          sudo docker run -d -p 80:80 --name node ${{env.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPOSITORY}}:${{ github.sha }}
       
