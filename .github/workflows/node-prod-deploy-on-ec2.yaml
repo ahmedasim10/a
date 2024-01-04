@@ -51,7 +51,6 @@ jobs:
     - name: Deploy to EC2 instances
       
       uses: appleboy/ssh-action@master
-            ssh -o StrictHostKeyChecking=no
       with:
           host: ${{secrets.EC2_HOST}}
           username: ${{env.EC2_USERNAME}}
