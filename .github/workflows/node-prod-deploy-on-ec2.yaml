@@ -48,7 +48,10 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-
+    - name: Set up SSH
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+          ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
     - name: Deploy to EC2 instances
       uses: appleboy/ssh-action@master
       with:
@@ -58,5 +61,5 @@ jobs:
           script: |
             sudo docker pull ${{env.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPOSITORY}}:${{ github.sha }}
             
-            sudo docker run -d -p 300:3000 --name node ${{env.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPOSITORY}}:${{ github.sha }}
+            sudo docker run -d -p 80:80 --name node ${{env.AWS_ACCOUNT_ID}}.dkr.ecr.${{env.AWS_REGION}}.amazonaws.com/${{env.ECR_REPOSITORY}}:${{ github.sha }}
       
