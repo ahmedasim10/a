@@ -51,6 +51,8 @@ jobs:
     - name: Deploy to EC2 instances
       uses: appleboy/ssh-action@master
       with:
+           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
            host: ${{ secrets.EC2_HOST }}
            username: ${{ env.EC2_USERNAME }}
            key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
